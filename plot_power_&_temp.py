@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
+I use this scipt to get seaborn facet plots of daywise power and temperature data
 Created on Fri Jun  8 08:59:52 2018
 
 @author: haroonr
@@ -11,8 +12,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(style="ticks",color_codes=True)
 from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.dates as mdates
-#import inspect
 plt.ioff()
 #%%
 dir = "/Volumes/MacintoshHD2/Users/haroonr/Detailed_datasets/Dominos/Dominos-04/"
