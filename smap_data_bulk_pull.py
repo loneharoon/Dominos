@@ -16,10 +16,11 @@ start_time =   "01/01/2017" #monthd/day/year
 end_time =     "05/31/2018"
 save_path = "/Volumes/MacintoshHD2/Users/haroonr/Detailed_datasets/Dominos/"
 miss_store = []
-stores =  ['Dominos-'+ str(i) for i in range(10,617)]
+#stores =  ['Dominos-'+ str(i) for i in range(10,617)]
+stores =  ['Dominos-'+ str(i) for i in range(60,66)]
 #%% create hdf file for the first time
-hstore = pd.HDFStore(save_path +'dominos_dataset.h5')
-#%% fetch power
+hstore = pd.HDFStore(save_path +'dominos_dataset_5stores.h5')
+#%% fetch power for hdf
 for store in stores:
     try:
         conn1 = ss.connect_archiver('dominos.zenatix.com','9105')
@@ -27,20 +28,19 @@ for store in stores:
         data, col_names = ss.temp_data(conn1, query, KEY)
         temp_df = ss.ems_datafram(data, col_names)
         temp_df.columns = ['temperature']
-        hstore.put(store+'/makeline_temperature',temp_df)
+        hstore.put('/' + store+'/makeline_temperature',temp_df)
         
         query = ss.makeline_power_query(start_time,end_time,store)
         conn1 = ss.connect_archiver('dominos.zenatix.com','9105')
         data, col_names = ss.temp_data(conn1, query, KEY)
         power_df = ss.ems_datafram(data, col_names)
         power_df.columns = ['power']
-        hstore.put(store+'/makeline_power',power_df)  
+        hstore.put('/' + store+'/makeline_power',power_df)  
         print('Store done {}'.format(store))
     except:
         miss_store.append(store)
         print('Missing store {}'.format(store))
 hstore.close()   
 #%% fetech temperature
-
 power_df.to_csv(save_path + store + "/power_"  + "makeline.csv" )
 ll = pd.io.pytables.HDFStore(save_path + 'dominos_dummy.h5')
