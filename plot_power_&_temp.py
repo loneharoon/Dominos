@@ -12,13 +12,14 @@ import plot_support as ps
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 plt.ioff()
-stores = ['Dominos-257', 'Dominos-22', 'Dominos-186', 'Dominos-19', 'Dominos-80', 'Dominos-27', 'Dominos-43', 'Dominos-79', 'Dominos-198', 'Dominos-25', 'Dominos-259', 'Dominos-397', 'Dominos-06', 'Dominos-402', 'Dominos-41', 'Dominos-232', 'Dominos-380', 'Dominos-290', 'Dominos-396', 'Dominos-384', 'Dominos-286', 'Dominos-58', 'Dominos-94', 'Dominos-187', 'Dominos-407', 'Dominos-05', 'Dominos-298', 'Dominos-387', 'Dominos-254', 'Dominos-206', 'Dominos-127', 'Dominos-238', 'Dominos-339', 'Dominos-95', 'Dominos-328', 'Dominos-236', 'Dominos-310', 'Dominos-139', 'Dominos-121', 'Dominos-117']
+stores = ['Dominos-257', 'Dominos-22', 'Dominos-186', 'Dominos-19', 'Dominos-80', 'Dominos-27', 'Dominos-43', 'Dominos-79', 'Dominos-198', 'Dominos-25', 'Dominos-259', 'Dominos-397', 'Dominos-06', 'Dominos-402', 'Dominos-41', 'Dominos-232', 'Dominos-380', 'Dominos-290', 'Dominos-396', 'Dominos-384', 'Dominos-286', 'Dominos-58', 'Dominos-94', 'Dominos-187', 'Dominos-407','Dominos-05', 'Dominos-298', 'Dominos-387', 'Dominos-254', 'Dominos-206', 'Dominos-127', 'Dominos-238', 'Dominos-339', 'Dominos-95', 'Dominos-328', 'Dominos-236', 'Dominos-310', 'Dominos-139', 'Dominos-121', 'Dominos-117']
+stores = ['Dominos-387', 'Dominos-254', 'Dominos-206', 'Dominos-127', 'Dominos-187', 'Dominos-407']
 #%%
 dir = "/Volumes/MacintoshHD2/Users/haroonr/Detailed_datasets/Dominos/"
 plots_dir = "/Volumes/MacintoshHD2/Users/haroonr/Detailed_datasets/Dominos/makeline_plots/"
-for i in range(5,11):
+for i in range(0,6):
     store = stores[i]
-    #store = "Dominos-22"
+  #  store = "Dominos-407"
     power = "power_makeline.csv"
     pdf = pd.read_csv(dir + store + '/' + power,index_col="Datetime")
     pdf.index = pd.to_datetime(pdf.index)
