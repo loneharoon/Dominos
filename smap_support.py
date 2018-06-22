@@ -48,9 +48,17 @@ def ems_datafram(a, b):
     return df
 
 def makeline_temp_query(start_time,end_time,campus):
-    query = "apply  to data in ('" + start_time + "','" + end_time +     "') limit -1 where Metadata/ControllerLocation/Campus = '" + campus + "' and      Metadata/Extra/PhysicalParameter = 'Temperature' and Metadata/Instrument/LoadType  = 'Makeline' "
+    query = "apply  to data in ('" + start_time + "','" + end_time +     "') limit -1 where Metadata/Controller_ID = '/" + campus + "' and      Metadata/Extra/PhysicalParameter = 'Temperature' and Metadata/Instrument/LoadType  = 'Makeline' "
     return query
 
+#def makeline_temp_query(start_time,end_time,campus):
+#    query = "apply  to data in ('" + start_time + "','" + end_time +     "') limit -1 where Metadata/ControllerLocation/Campus = '" + campus + "' and      Metadata/Extra/PhysicalParameter = 'Temperature' and Metadata/Instrument/LoadType  = 'Makeline' "
+#    return query
+
 def makeline_power_query(start_time,end_time,campus):
-    query = "apply  to data in ('" + start_time + "','" + end_time +     "') limit -1 where Metadata/ControllerLocation/Campus = '" + campus + "' and      Metadata/Extra/PhysicalParameter = 'Power' and Metadata/Extra/R_PHASE  = 'Makeline' "
+    query = "apply  to data in ('" + start_time + "','" + end_time +   "') limit -1 where Metadata/Controller_ID = '/" + campus + "' and      Metadata/Extra/PhysicalParameter = 'PowerRPhase' and Metadata/Extra/R_PHASE  = 'Makeline' "
     return query
+
+#def makeline_power_query(start_time,end_time,campus):
+#    query = "apply  to data in ('" + start_time + "','" + end_time +     "') limit -1 where Metadata/ControllerLocation/Campus = '" + campus + "' and      Metadata/Extra/PhysicalParameter = 'PowerRPhase' and Metadata/Extra/R_PHASE  = 'Makeline' "
+#    return query
