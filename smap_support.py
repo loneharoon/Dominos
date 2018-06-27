@@ -59,6 +59,11 @@ def makeline_power_query(start_time,end_time,campus):
     query = "apply  to data in ('" + start_time + "','" + end_time +   "') limit -1 where Metadata/Controller_ID = '/" + campus + "' and      Metadata/Extra/PhysicalParameter = 'PowerRPhase' and Metadata/Extra/R_PHASE  = 'Makeline' "
     return query
 
+
+def makeline_remote_control_query(start_time,end_time,campus):
+    query = "apply  to data in ('" + start_time + "','" + end_time +   "') limit -1 where Metadata/Controller_ID = '/" + campus + "' and      Metadata/Extra/PhysicalParameter = 'RemoteControl' and Metadata/Instrument/LoadType  = 'Makeline' "
+    return query
+
 #def makeline_power_query(start_time,end_time,campus):
 #    query = "apply  to data in ('" + start_time + "','" + end_time +     "') limit -1 where Metadata/ControllerLocation/Campus = '" + campus + "' and      Metadata/Extra/PhysicalParameter = 'PowerRPhase' and Metadata/Extra/R_PHASE  = 'Makeline' "
 #    return query
