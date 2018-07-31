@@ -14,8 +14,8 @@ import matplotlib.pyplot as plt
 def plot_facet_plots_power(df):
     h =  sns.FacetGrid(df,col='day', col_wrap = 7,size = 2.5,sharex=True,sharey=True,dropna=False)
     h = h.set_xticklabels(rotation = 15)
-    h = (h.map_dataframe(plt.plot,'timestamp','power')
-        .set_axis_labels('','power')
+    h = (h.map_dataframe(plt.plot,'timestamp','current')
+        .set_axis_labels('','current')
         .fig.subplots_adjust(wspace=.2,hspace=.5)
         )
     return h
