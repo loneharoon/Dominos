@@ -281,6 +281,7 @@ def  create_testing_stats_with_boxplot(testdata,k,sampling_type,sampling_rate):
   #for k, v in testdata:
     #print(k)
   samp = testdata.to_frame()
+  samp =  samp[samp != 0] # remove intial readings if store started late, otherwise it results in wrong clustering
   # handle nans in data
   nan_obs = int(samp.isnull().sum())
   #rule: if more than 50% are nan then I drop that day from calculcations othewise I drop nan readings only
@@ -385,21 +386,21 @@ def anomaly_detection_algorithm(test_stats,contexts_stats,alpha,num_std):
         # rule 1: when compressor shuts in middle of a day
         if  np.mean(test_results['ON_magnitude_std']) > 20:
             temp_res['status'] = 1
-            temp_res['anomtype'] = "compressor-shut-half"
+            temp_res['anomtype'] = "compressor-down"
             print('one compressor shut on day {} at context {}'.format(day,contxt ))
             #mylogger.write(day + ":" + contxt + "is not elongated anomaly as off time was also longer \n")
-            mylogger.write(day + ":"+ contxt + ", compressor-shut-halfday" + ", train_stats, " + str(train_results['ON_magnitude']['mean']) + ":"+str(train_results['ON_magnitude']['std']) + "; test_stats, " + str(np.mean(test_results['ON_magnitude_std'])) + "\n" )
+            mylogger.write(day + ":"+ contxt + ", compressor-down-halfday" + ", train_stats, " + str(train_results['ON_magnitude']['mean']) + ":" + str(train_results['ON_magnitude']['std']) + "; test_stats, " + str(np.mean(test_results['ON_magnitude_std'])) + "\n" )
         # rule 2: when compressors are shut for entire day beginning from morning
         elif np.mean(test_results['ON_magnitude_mean']) <= (train_results['ON_magnitude']['mean'])-2:
             temp_res['status'] = 1
-            temp_res['anomtype'] = "compressor-shut-full"
+            temp_res['anomtype'] = "compressor-down"
             print('one compressor shut for entire context {} on day {}'.format(contxt, day))
-            mylogger.write(day + ":"+ contxt + ", compressor-shut-fullday" + ", train_stats, " + str(train_results['ON_magnitude']['mean']) + ":"+str(train_results['ON_magnitude']['std']) + "; test_stats, " + str(np.mean(test_results['ON_magnitude_std'])) + "\n" )
+            mylogger.write(day + ":"+ contxt + ", compressor-down-fullday" + ", train_stats, " + str(train_results['ON_magnitude']['mean']) + ":"+ str(train_results['ON_magnitude']['std']) + "; test_stats, " + str(np.mean(test_results['ON_magnitude_mean'])) + ":" + str(np.mean(test_results['ON_magnitude_std'])) + "\n" )
         elif np.mean(test_results['ON_duration']) > alpha * train_results['ON_duration']['mean'] + num_std* train_results['ON_duration']['std']:
           temp_res['status'] = 1
-          temp_res['anomtype'] = "long-cycle"
+          temp_res['anomtype'] = "long-ON-cycle"
           print('Cycles with large  ON cycle duration in context {} on day {}'.format(contxt, day))
-          mylogger.write(day + ":"+ contxt + ", Longer ON cycles" + ", train_stats, " + str(train_results['ON_duration']['mean']) + ":"+str(train_results['ON_duration']['std']) + "; test_stats, " + str(np.mean(test_results['ON_duration'])) + "\n" )
+          mylogger.write(day + ":" + contxt + ", Long ON cycles" + ", train_stats, " + str(train_results['ON_duration']['mean']) + ":" + str(train_results['ON_duration']['std']) + "; test_stats, " + str(np.mean(test_results['ON_duration'])) + ":" + str(np.std(test_results['ON_duration'])) + "\n" )
         result.append(temp_res)
     res_df = pd.DataFrame.from_dict(result)
         # rule 3 of unum
@@ -553,12 +554,14 @@ import copy
 from scipy.stats import linregress
 def  compute_slope(df_temp):
     df_temp = copy.copy(df_temp)
-    df_temp = df_temp.dropna()
+    df_temp = df_temp.dropna() # dropping NA values
+    if df_temp.shape[0] == 0: # if empty frame left
+        return -55
     df_temp.columns = ['temp']
     df_temp['num_ind'] = range(1,df_temp.shape[0]+1)
     lf = linregress(df_temp['num_ind'].values, df_temp['temp'].values)
     df_temp['fit'] = [lf.slope*num + lf.intercept for num in df_temp['num_ind'].values]
-    df_temp[['temp','fit']].plot()
+    #df_temp[['temp','fit']].plot()
     return lf.slope
 #%%
 def AD_refit_testing(test_data,data_sampling_type,data_sampling_time,NoOfContexts,appliance):
