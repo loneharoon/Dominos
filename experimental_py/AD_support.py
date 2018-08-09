@@ -23,6 +23,20 @@ import my_utilities as myutil
 import  matplotlib.pyplot  as plt
 
 #%%
+
+def compute_tp_fp_fn_Dominso(gt,est):
+    gt_day = list(gt.day)
+    ob_day = list(est.timestamp)
+    tp = fp = fn = 0
+    for i in ob_day:
+        if i in gt_day:
+            tp = tp + 1
+        else:
+            fp = fp + 1 
+    for j in gt_day:
+        if j not in ob_day:
+            fn = fn + 1 
+    return tp, fp, fn
 def compute_AD_confusion_metrics(gt,ob):
     gt = gt[gt.Status=='S'] # only sure anomalies in ground truth
     print('\n Computing results w.r.t Sure anomalies only\n')
@@ -53,6 +67,20 @@ def compute_AD_confusion_metrics(gt,ob):
         print ("Recall results in error\n")
     return precision,recall,fscore
 #%%
+def compute_tp_fp_fn(gt,est):
+    gt_day = list(gt.day)
+    ob_day = list(est.timestamp)
+    tp = fp = fn = 0
+    precision = recall = fscore = np.nan
+    for i in ob_day:
+        if i in gt_day:
+            tp = tp + 1
+        else:
+            fp = fp + 1 
+    for j in gt_day:
+        if j not in ob_day:
+            fn = fn + 1 
+    return tp, fp, fn
 def compute_tp_fp_fn(gt,ob):
     gt = gt[gt.Status == 'S'] # only sure anomalies in ground truth
     print('\n Computing results w.r.t Sure anomalies only\n')
@@ -169,10 +197,10 @@ def create_training_stats(traindata,sampling_type,sampling_rate):
     #rule: if more than 50% are nan then I drop that day from calculcations othewise I drop nan readings only
     if nan_obs:  
       if nan_obs >= 0.50*samp.shape[0]:
-        print("More than 50percent obs missing hence drop day {} ".format(k))
-        #continue
+        #print("More than 50percent obs missing hence drop day {} ".format(k))
+        continue
       elif nan_obs < 0.50*samp.shape[0]:
-        print("dropping  {} nan observations for day {}".format(nan_obs,k))
+        #print("dropping  {} nan observations for day {}".format(nan_obs,k))
         samp.dropna(inplace=True)
     samp.columns = ['power']
     samp_val =  samp.values
@@ -287,10 +315,10 @@ def  create_testing_stats_with_boxplot(testdata,k,sampling_type,sampling_rate):
   #rule: if more than 50% are nan then I drop that day from calculcations othewise I drop nan readings only
   if nan_obs:  
     if nan_obs >= 0.50*samp.shape[0]:
-      print("More than 50percent missing hence dropping context {}".format(k))
+      #print("More than 50percent missing hence dropping context {}".format(k))
       return (False)
     elif nan_obs < 0.50*samp.shape[0]:
-      print("dropping  {} nan observations for total of {} in context {}".format(nan_obs, samp.shape[0], k))
+      #print("dropping  {} nan observations for total of {} in context {}".format(nan_obs, samp.shape[0], k))
       samp.dropna(inplace=True)
   samp.columns = ['power']
   samp_val =  samp.values
@@ -391,7 +419,7 @@ def anomaly_detection_algorithm(test_stats,contexts_stats,alpha,num_std):
             #mylogger.write(day + ":" + contxt + "is not elongated anomaly as off time was also longer \n")
             mylogger.write(day + ":"+ contxt + ", compressor-down-halfday" + ", train_stats, " + str(train_results['ON_magnitude']['mean']) + ":" + str(train_results['ON_magnitude']['std']) + "; test_stats, " + str(np.mean(test_results['ON_magnitude_std'])) + "\n" )
         # rule 2: when compressors are shut for entire day beginning from morning
-        elif np.mean(test_results['ON_magnitude_mean']) <= (train_results['ON_magnitude']['mean'])-2:
+        elif np.mean(test_results['ON_magnitude_mean']) <= (train_results['ON_magnitude']['mean'])/2:
             temp_res['status'] = 1
             temp_res['anomtype'] = "compressor-down"
             print('one compressor shut for entire context {} on day {}'.format(contxt, day))
@@ -403,79 +431,6 @@ def anomaly_detection_algorithm(test_stats,contexts_stats,alpha,num_std):
           mylogger.write(day + ":" + contxt + ", Long ON cycles" + ", train_stats, " + str(train_results['ON_duration']['mean']) + ":" + str(train_results['ON_duration']['std']) + "; test_stats, " + str(np.mean(test_results['ON_duration'])) + ":" + str(np.std(test_results['ON_duration'])) + "\n" )
         result.append(temp_res)
     res_df = pd.DataFrame.from_dict(result)
-        # rule 3 of unum
-  #      if np.mean(test_results['ON_energy'] >  train_results['ON_energy']['mean'] + num_std* train_results['ON_energy']['std']) and (np.mean(test_results['OFF_energy']) >  train_results['OFF_energy']['mean'] + num_std* train_results['OFF_energy']['std']):
-  #        temp_res['status'] = 0
-  #        mylogger.write(day + ":" + contxt + "is not elongated anomaly as off time was also longer \n")
-  #      # rule 1: if energy conumed too much
-#        if np.mean(test_results['ON_energy']) > alpha * train_results['ON_energy']['mean'] + num_std* train_results['ON_energy']['std']:
-#          temp_res['status'] = 1
-#          temp_res['anomtype'] = "long"
-          #mylogger.write(day + ":"+ contxt + ", elongated anomaly" + ", train_stats duration, " + str(train_results['ON_energy']['mean']) + ":"+str(train_results['ON_energy']['std']) + "; test_stats energy, " + str(np.mean(test_results['ON_energy'])) + "\n" )
-              # rule 2: if frequen cyclcing occured
-#        elif np.mean(test_results['ON_cycles']) >  alpha * train_results['ON_cycles']['mean'] + num_std* train_results['ON_cycles']['std']:
-#          temp_res['status'] = 1
-#          temp_res['anomtype'] = "frequent"
-          #mylogger.write(day + ":"+contxt +  ", frequent anomaly" + ", train_stats frequency, " + str(train_results['ON_cycles']['mean']) + ":"+str(train_results['ON_cycles']['std']) + "; test_stats frequency, " + str(np.mean(test_results['ON_cycles'])) + "\n"  )
-        #result.append(temp_res)
-  
-#  #% rectify timestamps by including appropriate context information
-#  updated_timestamp = []
-#  for i in range(0,res_df['context'].shape[0]):
-#      context = res_df['context'][i]
-#      timestamp = res_df['timestamp'][i]
-#      if context == 'night_1_gp':
-#        timestamp =  timestamp + timedelta(hours = 3)
-#      elif context == 'day_1_gp':
-#        timestamp =  timestamp + timedelta(hours = 9)
-#      elif context == 'day_2_gp':
-#        timestamp =  timestamp + timedelta(hours = 15)
-#      elif context == 'night_2_gp':
-#        timestamp =  timestamp + timedelta(hours = 21)
-#      elif context == 'all24_gp':
-#        timestamp =  timestamp + timedelta(hours = 12)
-#      elif context == 'first12_gp':
-#        timestamp =  timestamp + timedelta(hours = 6)
-#      elif context == 'last12_gp':
-#        timestamp =  timestamp + timedelta(hours = 18)
-#      elif context == 'first8_gp':
-#        timestamp =  timestamp + timedelta(hours = 4)
-#      elif context == 'next8_gp':
-#        timestamp =  timestamp + timedelta(hours = 12)
-#      elif context == 'last8_gp':
-#        timestamp =  timestamp + timedelta(hours = 19)
-#      elif context == 'gp_0_4':
-#        timestamp =  timestamp + timedelta(hours = 3)
-#      elif context == 'gp_4_8':
-#        timestamp =  timestamp + timedelta(hours = 6)
-#      elif context == 'gp_8_12':
-#        timestamp =  timestamp + timedelta(hours = 10)
-#      elif context == 'gp_12_16':
-#        timestamp =  timestamp + timedelta(hours = 14)
-#      elif context == 'gp_16_20':
-#        timestamp =  timestamp + timedelta(hours = 18)
-#      elif context == 'gp_20_24':
-#        timestamp =  timestamp + timedelta(hours = 12)
-#      elif context == 'gp_0_3':
-#        timestamp =  timestamp + timedelta(hours = 2)
-#      elif context == 'gp_3_6':
-#        timestamp =  timestamp + timedelta(hours = 5)
-#      elif context == 'gp_6_9':
-#        timestamp =  timestamp + timedelta(hours = 8)
-#      elif context == 'gp_9_12':
-#        timestamp =  timestamp + timedelta(hours = 11)
-#      elif context == 'gp_12_15':
-#        timestamp =  timestamp + timedelta(hours = 14)
-#      elif context == 'gp_15_18':
-#        timestamp =  timestamp + timedelta(hours = 17)
-#      elif context == 'gp_18_21':
-#        timestamp =  timestamp + timedelta(hours = 20)
-#      elif context == 'gp_21_24':
-#        timestamp =  timestamp + timedelta(hours = 23)
-#      else:
-#          raise ValueError("Provide required context defintions in anomaly detection algorithm")
-#      updated_timestamp.append(timestamp)
-#  res_df['updated_timestamp'] =  updated_timestamp
   return(res_df[res_df.status == 1]) # returns only anomaly packets 
 
 
@@ -513,32 +468,7 @@ def create_contexts(data, NoOfContexts):
         contexts = OrderedDict()
         contexts['first8_gp'] = data.between_time("00:00","07:59:59")
         contexts['next8_gp'] = data.between_time("08:00","15:59:59")
-        contexts['last8_gp'] = data.between_time("16:00","23:59:59")
-    elif NoOfContexts == 4:
-        contexts = OrderedDict()
-        contexts['night_1_gp'] = data.between_time("00:00:00","05:59:59")
-        contexts['day_1_gp'] =  data.between_time("06:00:00","11:59:59")
-        contexts['day_2_gp'] = data.between_time("12:00:00","17:59:59")
-        contexts['night_2_gp'] = data.between_time("18:00:00","23:59:59")
-    elif NoOfContexts == 6:
-        contexts = OrderedDict()
-        contexts['gp_0_4'] =   data.between_time("00:00","03:59:59")
-        contexts['gp_4_8'] =   data.between_time("04:00","07:59:59")
-        contexts['gp_8_12'] =  data.between_time("08:00","11:59:59")
-        contexts['gp_12_16'] = data.between_time("12:00","15:59:59")
-        contexts['gp_16_20'] = data.between_time("16:00","19:59:59")
-        contexts['gp_20_24'] = data.between_time("20:00","23:59:59")
-    elif NoOfContexts == 8:
-        contexts = OrderedDict()
-        contexts['gp_0_3'] =    data.between_time("00:00","02:59:59")
-        contexts['gp_3_6'] =    data.between_time("03:00","05:59:59")
-        contexts['gp_6_9'] =    data.between_time("06:00","08:59:59")
-        contexts['gp_9_12'] =   data.between_time("09:00","11:59:59")
-        contexts['gp_12_15'] =  data.between_time("12:00","14:59:59")
-        contexts['gp_15_18'] =  data.between_time("15:00","17:59:59")
-        contexts['gp_18_21'] =  data.between_time("18:00","20:59:59")
-        contexts['gp_21_24'] =  data.between_time("21:00","23:59:59")
-    
+        contexts['last8_gp'] = data.between_time("16:00","23:59:59")    
     else:
         raise ValueError("Please provide contexts which make sense\n")
     return (contexts)
@@ -688,27 +618,7 @@ def anomalous_days_from_gt(house_no,appliance,day_start,day_end):
         temp2['day'] = days
         gt_df = gt_df.append(temp2)
     return (gt_df.day)
-#%%
-def get_test_dates(home):
-     ''' return date range of testing data for different homes'''
-     if home == "House10.pkl":
-         start_date= "2014-05-01"
-         end_date = "2014-06-30"
-     elif home == "House20.pkl": 
-         start_date= "2014-06-01"
-         end_date = "2014-08-31"
-     elif home == "House18.pkl":
-         start_date= "2014-08-01"
-         end_date = "2014-10-31"
-     elif home == "House16.pkl":    
-         start_date= "2014-04-01"
-         end_date = "2014-06-30"
-     elif home == "House1.pkl":    
-         start_date= "2015-01-01"
-         end_date = "2015-03-31" 
-     else :
-         raise ValueError ("I don't have mapping of supplied home")
-     return start_date,end_date
+
 #%%
 def find_my_anomalous_dates_from_gt(home):    
     myapp = get_selected_home_appliance(home)
@@ -739,3 +649,28 @@ def plot_bind_save_all_anomalies(actual_data, anom_list, home, myapp):
     file_list = [savedir + i for i in os.listdir(savedir) if i.endswith(".pdf")]
     saveresult = savedir + "combine" + ".pdf"
     myutil.create_pdf_from_pdf_list(file_list, saveresult)
+#%%
+def get_train_test_dates(store_name):
+    store_dic = {}
+    dic_values = {}
+    store_dic['Dominos-22'] = {'train_duration':{'start':'2018-02-10','end': '2018-02-20'},'test_duration':{'start':'2018-03-01','end':'2018-06-30'}}
+    store_dic['Dominos-25'] = {'train_duration':{'start':'2018-02-01','end': '2018-02-07'},'test_duration':{'start':'2018-03-01','end':'2018-06-30'}}
+    store_dic['Dominos-07'] = {'train_duration':{'start':'2018-02-15','end': '2018-02-21'},'test_duration':{'start':'2018-03-01','end':'2018-06-30'}}
+    store_dic['Dominos-95'] = {'train_duration':{'start':'2018-02-08','end': '2018-02-14'},'test_duration':{'start':'2018-03-01','end':'2018-06-30'}}
+    store_dic['Dominos-117']= {'train_duration':{'start':'2018-02-15','end': '2018-02-21'},'test_duration':{'start':'2018-03-01','end':'2018-06-30'}}
+    store_dic['Dominos-127']= {'train_duration':{'start':'2018-02-01','end': '2018-02-07'},'test_duration':{'start':'2018-03-01','end':'2018-06-30'}}
+    store_dic['Dominos-236']= {'train_duration':{'start':'2018-02-01','end': '2018-02-07'},'test_duration':{'start':'2018-03-01','end':'2018-06-30'}}
+    store_dic['Dominos-380']= {'train_duration':{'start':'2018-02-08','end': '2018-02-14'},'test_duration':{'start':'2018-03-01','end':'2018-04-09'}}
+    store_dic['Dominos-139']= {'train_duration':{'start':'2018-02-01','end': '2018-02-07'},'test_duration':{'start':'2018-03-01','end':'2018-06-30'}}
+    store_dic['Dominos-254']= {'train_duration':{'start':'2018-02-01','end': '2018-02-07'},'test_duration':{'start':'2018-03-01','end':'2018-06-30'}}
+    store_dic['Dominos-259']= {'train_duration':{'start':'2018-02-01','end': '2018-02-07'},'test_duration':{'start':'2018-03-01','end':'2018-06-30'}}
+    store_dic['Dominos-80']= {'train_duration':{'start':'2018-02-08','end':  '2018-02-14'},'test_duration':{'start':'2018-03-01','end':'2018-05-31'}}   
+    store_dic['Dominos-310']= {'train_duration':{'start':'2018-02-16','end': '2018-02-21'},'test_duration':{'start':'2018-03-01','end':'2018-06-30'}}   
+    store_dic['Dominos-257']= {'train_duration':{'start':'2018-02-17','end': '2018-02-27'},'test_duration':{'start':'2018-03-01','end':'2018-04-30'}}   
+
+    try:
+        dic_values = store_dic[store_name]
+    except:
+        print('the store is not registered in the database: please update this in the method get_train_test_datas method')
+    return dic_values
+    
