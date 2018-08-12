@@ -12,7 +12,7 @@ Created on Sat Aug 11 23:38:00 2018
 """
 import pandas as pd
 import numpy as np
-
+import matplotlib.pyplot as plt
 #%%
 def compute_cycle_statistics(traindata):
   """ this method computes cycle frequences and durations from the training data
@@ -109,8 +109,6 @@ def call_cycle_stats(train_data, NoOfContexts, appliance):
         contexts_stats[k] = compute_cycle_statistics(v) 
     return contexts_stats
   #%%
-call_cycle_stats(train_data,2,'dumy')
-  #%%
 dir = "/Volumes/MacintoshHD2/Users/haroonr/Detailed_datasets/Dominos/"
 #stores = ['Dominos-257','Dominos-22','Dominos-25']
 stores = ['Dominos-257', 'Dominos-22','Dominos-186','Dominos-19', 'Dominos-80', 'Dominos-27', 'Dominos-43', 'Dominos-79', 'Dominos-198', 'Dominos-25', 'Dominos-259', 'Dominos-397', 'Dominos-06', 'Dominos-402', 'Dominos-41', 'Dominos-232', 'Dominos-380', 'Dominos-290', 'Dominos-396', 'Dominos-384', 'Dominos-286', 'Dominos-58', 'Dominos-94', 'Dominos-187', 'Dominos-05', 'Dominos-298', 'Dominos-387', 'Dominos-254', 'Dominos-206', 'Dominos-127', 'Dominos-238', 'Dominos-339', 'Dominos-95', 'Dominos-328', 'Dominos-236', 'Dominos-310', 'Dominos-139', 'Dominos-121', 'Dominos-117']
@@ -124,7 +122,7 @@ for store in stores:
   df_samp = df.resample('1T',label = 'right', closed ='right').mean()
   df_sel = df_samp.current
   myapp = "DEFY"
-  NoOfContexts, appliance = 2, myapp
+  NoOfContexts, appliance = 1, myapp
   train_data =  df_sel['2018-02-01':'2018-02-10'] 
   train_results = call_cycle_stats(train_data, NoOfContexts, appliance)
   #%
@@ -138,6 +136,19 @@ for store in stores:
   OFF_duration_mean = train_results['first12_gp']['OFF_duration']['mean']
   OFF_duration_std = train_results['first12_gp']['OFF_duration']['std']
   dic[store] ={'ON_cycles_mean':ON_cycles_mean,'ON_cycles_std':ON_cycles_std,'OFF_cycles_mean':OFF_cycles_mean,'OFF_cycles_std':OFF_cycles_std,'ON_duration_mean':ON_duration_mean,'ON_duration_std':ON_duration_std,'OFF_duration_mean':OFF_duration_mean,'OFF_duration_std':OFF_duration_std}
-#
+#%%
 res_df = pd.DataFrame.from_dict(dic).T
-res_df.to_csv('/Volumes/MacintoshHD2/Users/haroonr/Dropbox/zenatix/results/cycle_statistics_dominos.csv')
+res_df.to_csv('/Volumes/MacintoshHD2/Users/haroonr/Dropbox/zenatix/results/cycle_statistics_dominos_with_nocontext.csv')
+
+res_df[res_df>150] = 10
+#%%
+df_select = res_df['ON_cycles_mean','ON_duration_mean','OFF_duration_mean']
+df_select.columns = ['Cycles taken','ON cycle duration','OFF cycle duration']
+df_select[df_select>150] = 10
+df_select.boxplot(column=['ON cycle duration','OFF cycle duration'], return_type='axes',grid=False)
+plt.savefig('/Volumes/MacintoshHD2/Users/haroonr/Dropbox/zenatix/paper/pics/cycle_duration.pdf')
+plt.close()
+#%%
+df_select.boxplot(column=['Cycles taken'], return_type='axes',grid=False)
+plt.savefig('/Volumes/MacintoshHD2/Users/haroonr/Dropbox/zenatix/paper/pics/cycle_taken.pdf')
+plt.close()
