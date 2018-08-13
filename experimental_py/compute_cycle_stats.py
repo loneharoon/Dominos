@@ -6,6 +6,8 @@ In this script, I compute stats to show that dominos stores have different cycle
 This script uses various methods defined in AD_support.py so open that file first and run the file completely to get results.
 Apart from that this script is complete and gets results done.
 
+ Last few cell read the saved data and plot directly
+
 Created on Sat Aug 11 23:38:00 2018
 
 @author: haroonr
@@ -150,5 +152,21 @@ plt.savefig('/Volumes/MacintoshHD2/Users/haroonr/Dropbox/zenatix/paper/pics/cycl
 plt.close()
 #%%
 df_select.boxplot(column=['Cycles taken'], return_type='axes',grid=False)
+plt.savefig('/Volumes/MacintoshHD2/Users/haroonr/Dropbox/zenatix/paper/pics/cycle_taken.pdf')
+plt.close()
+
+#%% In this cell, I plot the results which I have already saved as a CSV file.
+# in previous cells I plot on the fly.
+
+read_path ='/Volumes/MacintoshHD2/Users/haroonr/Dropbox/zenatix/results/cycle_statistics_dominos_with_nocontext.csv'
+res_df = pd.read_csv(read_path)
+df_select = res_df[['ON_cycles_mean','ON_duration_mean','OFF_duration_mean']]
+df_select.columns = ['Cycles taken','ON cycle duration','OFF cycle duration']
+df_select[df_select>150] = 10
+df_select.boxplot(column=['ON cycle duration','OFF cycle duration'], return_type='axes',grid=False,figsize=(4,4))
+plt.savefig('/Volumes/MacintoshHD2/Users/haroonr/Dropbox/zenatix/paper/pics/cycle_duration.pdf')
+plt.close()
+
+df_select.boxplot(column=['Cycles taken'], return_type='axes',grid=False,figsize=(2.8,4))
 plt.savefig('/Volumes/MacintoshHD2/Users/haroonr/Dropbox/zenatix/paper/pics/cycle_taken.pdf')
 plt.close()
