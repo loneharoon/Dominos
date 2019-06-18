@@ -9,9 +9,9 @@ Created on Thu Jun  7 15:45:34 2018
 import os
 import smap_support as ss
 import pandas as pd
-KEY = "jmAcs0ah172L8DQXJlkIeuKE8ppTetrBTczq"
+KEY = " " # put your key
 #%%
-conn1 = ss.connect_archiver('dominos.zenatix.com','9105')
+conn1 = ss.connect_archiver('dominos.zenatix.com', port_number_string) 
 start_time =   "02/01/2018" #monthd/day/year
 end_time =     "06/30/2018 23:59:59"
 save_path = "/Volumes/MacintoshHD2/Users/haroonr/Detailed_datasets/Dominos/"
